@@ -1,0 +1,15 @@
+{
+  "name": "sked-runner",
+  "version": "0.2.0-rc1",
+  "description": "Sked runners for picking up schedules, checking if their conditions are being met and then executing associated AMQP workflows.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.indiqus.net:sked/sked-runner.git"
+  },
+  "author": "Rudi MK <rudraksh@indiqus.com>",
+  "license": "ISC"
+}
