@@ -11,7 +11,7 @@
     "build": "docker build -t $npm_package_name:v$npm_package_version-$(git rev-parse --abbrev-ref HEAD) .",
     "tag": "docker tag $npm_package_name:v$npm_package_version-$(git rev-parse --abbrev-ref HEAD) $npm_package_config_registry/$npm_package_name:v$npm_package_version-$(git rev-parse --abbrev-ref HEAD)",
     "push": "docker push $npm_package_config_registry/$npm_package_name:v$npm_package_version-$(git rev-parse --abbrev-ref HEAD)",
-    "prep": "npm run build && npm run tag && npm run push",
+    "prep": "npm run build && npm run tag && npm run push"
   },
   "repository": {
     "type": "git",
