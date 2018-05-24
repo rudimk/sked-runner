@@ -83,7 +83,8 @@ function checkScheduleRules(){
 	}
 	// If all flags are set to true, return a true - else return false
 	let allFlags = _.values(scheduleFlags)
-	if (_.includes(allFlags) == true) {
+	let reducedFlag = _.every(_.values(allFlags), function(v) {return !v})
+	if (reducedFlag == true) {
 		return true
 	}
 	else{
@@ -93,5 +94,9 @@ function checkScheduleRules(){
 
 
 var runner = schedule.scheduleJob('*/1 * * * *', function(){
-	
+	let scheduleFlagCheck = checkScheduleRules()
+	if (scheduleFlagCheck == true) {
+		let publisher = publishWorkflowPayload()
+		logger.info(`[X] Published workflow ID ${process.env.WORKFLOW_ID}.`)
+	}
 })
