@@ -16,12 +16,10 @@ const logger = new (winston.Logger)({
 
 logger.level = 'debug'
 
-//const tortoise = new Tortoise(`amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWD}@${process.env.RABBITMQ_HOST}:${process.env.RABBITMQ_PORT}`)
-
-function publishWorkflowPayload(host, port, username, password, exchange, queue, routing_key, payload){
+function publishWorkflowPayload(){
 	try{
-		let Tortoise = new Tortoise(`amqp://${username}:${password}@${host}:${port}`)
-		tortoise.exchange(exchange, 'direct', {durable: false}).publish(routing_key, payload)
+		let Tortoise = new Tortoise(`amqp://${process.env.AMQP_USERNAME}:${process.env.AMQP_PASSWORD}@${process.env.AMQP_HOST}:${process.env.AMQP_PORT}`)
+		tortoise.exchange(process.env.AMQP_EXCHANGE, 'direct', {durable: false}).publish(process.env.AMQP_ROUTING_KEY, JSON.parse(process.env.AMQP_PAYLOAD))
 		return true
 	}
 	catch(err){
