@@ -1,5 +1,6 @@
 const moment = require('moment-timezone')
-const schedule = require('node-schedule')
+//const schedule = require('node-schedule')
+var CronJob = require('cron').CronJob
 const Tortoise = require('tortoise')
 const winston = require('winston')
 const _ = require('lodash')
@@ -18,7 +19,7 @@ logger.level = 'debug'
 
 function publishWorkflowPayload(){
 	try{
-		let Tortoise = new Tortoise(`amqp://${process.env.AMQP_USERNAME}:${process.env.AMQP_PASSWORD}@${process.env.AMQP_HOST}:${process.env.AMQP_PORT}`)
+		let tortoise = new Tortoise(`amqp://${process.env.AMQP_USERNAME}:${process.env.AMQP_PASSWORD}@${process.env.AMQP_HOST}:${process.env.AMQP_PORT}`)
 		tortoise.exchange(process.env.AMQP_EXCHANGE, 'direct', {durable: false}).publish(process.env.AMQP_ROUTING_KEY, JSON.parse(process.env.AMQP_PAYLOAD))
 		return true
 	}
@@ -30,7 +31,9 @@ function publishWorkflowPayload(){
 
 function checkScheduleRules(){
 	let currentTime = moment.tz(process.env.TIMEZONE)
+	logger.debug("currentTime = ", currentTime)
 	let scheduleFlags = {minutes: false, hours: false, weekdays: false, days: false, months: false}
+	logger.debug("Precheck scheduleFlags = ", scheduleFlags)
 	// Check for minutes
 	if (JSON.parse(process.env.MINUTES).length == 0){
 		scheduleFlags.minutes = true
@@ -82,8 +85,11 @@ function checkScheduleRules(){
 		scheduleFlags.months = false
 	}
 	// If all flags are set to true, return a true - else return false
+	logger.debug("Postcheck scheduleFlags = ", scheduleFlags)
 	let allFlags = _.values(scheduleFlags)
-	let reducedFlag = _.every(_.values(allFlags), function(v) {return !v})
+	logger.debug("allFlags = ", allFlags)
+	let reducedFlag = _.every(_.values(allFlags), function(v) {return v})
+	logger.debug("reducedFlag = ", reducedFlag)
 	if (reducedFlag == true) {
 		return true
 	}
@@ -93,10 +99,18 @@ function checkScheduleRules(){
 }
 
 
-var runner = schedule.scheduleJob('*/1 * * * *', function(){
+/*schedule.scheduleJob('05 * * * * *', function(){
 	let scheduleFlagCheck = checkScheduleRules()
 	if (scheduleFlagCheck == true) {
 		let publisher = publishWorkflowPayload()
 		logger.info(`[X] Published workflow ID ${process.env.WORKFLOW_ID}.`)
 	}
-})
+})*/
+
+new CronJob('* * * * *', function(){
+	let scheduleFlagCheck = checkScheduleRules()
+	if (scheduleFlagCheck == true) {
+		let publisher = publishWorkflowPayload()
+		logger.info(`[X] Published workflow ID ${process.env.WORKFLOW_ID}.`)
+	}
+}, null, true, 'Asia/Kolkata')
