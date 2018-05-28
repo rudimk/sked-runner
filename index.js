@@ -93,7 +93,7 @@ function checkScheduleRules(){
 }
 
 
-var runner = schedule.scheduleJob('*/1 * * * *', function(){
+schedule.scheduleJob('05 * * * * *', function(){
 	let scheduleFlagCheck = checkScheduleRules()
 	if (scheduleFlagCheck == true) {
 		let publisher = publishWorkflowPayload()
