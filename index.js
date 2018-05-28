@@ -99,14 +99,6 @@ function checkScheduleRules(){
 }
 
 
-/*schedule.scheduleJob('05 * * * * *', function(){
-	let scheduleFlagCheck = checkScheduleRules()
-	if (scheduleFlagCheck == true) {
-		let publisher = publishWorkflowPayload()
-		logger.info(`[X] Published workflow ID ${process.env.WORKFLOW_ID}.`)
-	}
-})*/
-
 new CronJob('* * * * *', function(){
 	let scheduleFlagCheck = checkScheduleRules()
 	if (scheduleFlagCheck == true) {
