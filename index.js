@@ -118,6 +118,10 @@ function checkScheduleRules(){
 				scheduleFlags.months = false
 			}
 			// If all flags are set to true, return a true - else return false
+			let unlock = unlockScheduleRow()
+			.then((res) => {
+				logger.debug("Unlocked schedule ID ", process.env.SCHEDULE_ID)
+			})
 			logger.debug("Postcheck scheduleFlags = ", scheduleFlags)
 			let allFlags = _.values(scheduleFlags)
 			logger.debug("allFlags = ", allFlags)
