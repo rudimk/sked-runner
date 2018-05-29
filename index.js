@@ -63,7 +63,7 @@ async function checkScheduleRules(){
 	if (lockFlag == true){
 		logger.debug("Lock obtained for schedule ID ", process.env.SCHEDULE_ID)
 		let currentTime = moment.tz(process.env.TIMEZONE)
-		logger.debug("currentTime = ", currentTime)
+		logger.debug("currentTime = ", currentTime.format('DD-MM-YYYY HH:mm:ss ZZ'))
 		let scheduleFlags = {minutes: false, hours: false, weekdays: false, days: false, months: false}
 		logger.debug("Precheck scheduleFlags = ", scheduleFlags)
 		// Check for minutes
