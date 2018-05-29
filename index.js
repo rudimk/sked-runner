@@ -1,5 +1,5 @@
 const moment = require('moment-timezone')
-//const schedule = require('node-schedule')
+const db = require('knex')(require('./knexfile.js'))
 var CronJob = require('cron').CronJob
 const Tortoise = require('tortoise')
 const winston = require('winston')
@@ -16,6 +16,35 @@ const logger = new (winston.Logger)({
 })
 
 logger.level = 'debug'
+
+//A helper function to lock the schedules table
+async function lockScheduleRow(){
+	try{
+		let row = await db.select('status').from('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID))
+		if(row[0]['status'] != 2){
+			let lockRow = await db('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID)).update({status: 2})
+			return true
+		}
+		else{
+			return false
+		}
+	}
+	catch(err){
+		logger.error("Error in lockScheduleRow: ", err)
+		return false
+	}
+}
+
+//A helper function to unlock the schedules table
+async function unlockScheduleRow(){
+	try{
+		let unlockRow = await db('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID)).update({status: 1})
+	}
+	catch(err){
+		logger.error("Error in unlockScheduleRow: ", err)
+		return false
+	}
+}
 
 function publishWorkflowPayload(){
 	try{
