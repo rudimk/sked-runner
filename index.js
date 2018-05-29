@@ -121,18 +121,18 @@ function checkScheduleRules(){
 			let unlock = unlockScheduleRow()
 			.then((res) => {
 				logger.debug("Unlocked schedule ID ", process.env.SCHEDULE_ID)
-			})
-			logger.debug("Postcheck scheduleFlags = ", scheduleFlags)
-			let allFlags = _.values(scheduleFlags)
-			logger.debug("allFlags = ", allFlags)
-			let reducedFlag = _.every(_.values(allFlags), function(v) {return v})
-			logger.debug("reducedFlag = ", reducedFlag)
-			if (reducedFlag == true) {
-				return true
-			}
-			else{
-				return false
-			}		
+				logger.debug("Postcheck scheduleFlags = ", scheduleFlags)
+				let allFlags = _.values(scheduleFlags)
+				logger.debug("allFlags = ", allFlags)
+				let reducedFlag = _.every(_.values(allFlags), function(v) {return v})
+				logger.debug("reducedFlag = ", reducedFlag)
+				if (reducedFlag == true) {
+					return true
+				}
+				else{
+					return false
+				}	
+			})	
 		}
 		else{
 			logger.debug("Lock not obtained for schedule ID ", process.env.SCHEDULE_ID)

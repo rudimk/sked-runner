@@ -1,6 +1,6 @@
 {
   "name": "sked-runner",
-  "version": "0.2.0-rc7",
+  "version": "0.2.0-rc8",
   "description": "Sked runners for picking up schedules, checking if their conditions are being met and then executing associated AMQP workflows.",
   "main": "index.js",
   "config": {
