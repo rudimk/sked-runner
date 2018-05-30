@@ -17,8 +17,39 @@ const logger = new (winston.Logger)({
 
 logger.level = 'debug'
 
-//A helper function to lock the schedules table
 async function lockScheduleRow(){
+	try{
+		let row = await db.select('status', 'last_run').from('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID))
+		logger.debug("Lock row status: ", row[0]['status'])
+		logger.debug("Lock row last_run: ", row[0]['last_run'])
+		logger.debug("moment.tz(process.env.TIMEZONE).format('mm'): ", parseInt(moment.tz(process.env.TIMEZONE).format('mm')))
+		if (parseInt(row[0]['status']) == 1){
+			logger.debug(1)
+			if (parseInt(row[0]['last_run']) < parseInt(moment.tz(process.env.TIMEZONE).format('mm'))) {
+				logger.debug(2)
+				let lockRow = await db('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID)).update({status: 2, last_run: parseInt(moment.tz(process.env.TIMEZONE).format('mm'))})
+				return true
+			}
+			else{
+				logger.debug(3)
+				return false
+			}
+			//let transaction = await db.schema.raw("BEGIN")
+			//logger.debug(transaction)	
+		}
+		else{
+			logger.debug(4)
+			return false
+		}
+	}
+	catch(err){
+		logger.error("Error in lockScheduleRow: ", err)
+		return false
+	}
+}
+
+//A helper function to lock the schedules table
+/*async function lockScheduleRow(){
 	try{
 		let row = await db.select('status').from('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID))
 		if(row[0]['status'] != 2){
@@ -33,10 +64,21 @@ async function lockScheduleRow(){
 		logger.error("Error in lockScheduleRow: ", err)
 		return false
 	}
+}*/
+
+async function unlockScheduleRow(){
+	try{
+		let unlockRow = await db('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID)).update({status: 1})
+		return true
+	}
+	catch(err){
+		logger.error("Error in unlockScheduleRow: ", err)
+		return false
+	}
 }
 
 //A helper function to unlock the schedules table
-async function unlockScheduleRow(){
+/*async function unlockScheduleRow(){
 	try{
 		let unlockRow = await db('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID)).update({status: 1})
 	}
@@ -44,7 +86,7 @@ async function unlockScheduleRow(){
 		logger.error("Error in unlockScheduleRow: ", err)
 		return false
 	}
-}
+}*/
 
 function publishWorkflowPayload(){
 	try{
@@ -117,17 +159,20 @@ async function checkScheduleRules(){
 			scheduleFlags.months = false
 		}
 		// If all flags are set to true, return a true - else return false
-		let unlock = await unlockScheduleRow()
-		logger.debug("Unlocked schedule ID ", process.env.SCHEDULE_ID)
 		logger.debug("Postcheck scheduleFlags = ", scheduleFlags)
 		let allFlags = _.values(scheduleFlags)
 		logger.debug("allFlags = ", allFlags)
 		let reducedFlag = _.every(_.values(allFlags), function(v) {return v})
 		logger.debug("reducedFlag = ", reducedFlag)
 		if (reducedFlag == true) {
+			publishWorkflowPayload()
+			let unlock = await unlockScheduleRow()
+			logger.debug("Unlocked schedule ID ", process.env.SCHEDULE_ID)
 			return true
 		}
 		else{
+			let unlock = await unlockScheduleRow()
+			logger.debug("Unlocked schedule ID ", process.env.SCHEDULE_ID)
 			return false
 		}
 	}
@@ -142,8 +187,7 @@ new CronJob('* * * * *', function(){
 	checkScheduleRules()
 	.then((scheduleFlagCheck) => {
 		if (scheduleFlagCheck == true) {
-			let publisher = publishWorkflowPayload()
-			logger.info(`[X] Published workflow ID ${process.env.WORKFLOW_ID}.`)
+			logger.info("Ran schedule workflow successfully.")
 		}
 	})
 }, null, true, 'Asia/Kolkata')
