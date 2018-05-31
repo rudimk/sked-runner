@@ -20,25 +20,16 @@ logger.level = 'debug'
 async function lockScheduleRow(){
 	try{
 		let row = await db.select('status', 'last_run').from('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID))
-		logger.debug("Lock row status: ", row[0]['status'])
-		logger.debug("Lock row last_run: ", row[0]['last_run'])
-		logger.debug("moment.tz(process.env.TIMEZONE).format('mm'): ", parseInt(moment.tz(process.env.TIMEZONE).format('mm')))
 		if (parseInt(row[0]['status']) == 1){
-			logger.debug(1)
 			if (parseInt(row[0]['last_run']) < parseInt(moment.tz(process.env.TIMEZONE).format('mm'))) {
-				logger.debug(2)
 				let lockRow = await db('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID)).update({status: 2, last_run: parseInt(moment.tz(process.env.TIMEZONE).format('mm'))})
 				return true
 			}
 			else{
-				logger.debug(3)
 				return false
 			}
-			//let transaction = await db.schema.raw("BEGIN")
-			//logger.debug(transaction)	
 		}
 		else{
-			logger.debug(4)
 			return false
 		}
 	}
@@ -47,24 +38,6 @@ async function lockScheduleRow(){
 		return false
 	}
 }
-
-//A helper function to lock the schedules table
-/*async function lockScheduleRow(){
-	try{
-		let row = await db.select('status').from('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID))
-		if(row[0]['status'] != 2){
-			let lockRow = await db('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID)).update({status: 2})
-			return true
-		}
-		else{
-			return false
-		}
-	}
-	catch(err){
-		logger.error("Error in lockScheduleRow: ", err)
-		return false
-	}
-}*/
 
 async function unlockScheduleRow(){
 	try{
@@ -76,17 +49,6 @@ async function unlockScheduleRow(){
 		return false
 	}
 }
-
-//A helper function to unlock the schedules table
-/*async function unlockScheduleRow(){
-	try{
-		let unlockRow = await db('schedules').where('id', '=', parseInt(process.env.SCHEDULE_ID)).update({status: 1})
-	}
-	catch(err){
-		logger.error("Error in unlockScheduleRow: ", err)
-		return false
-	}
-}*/
 
 function publishWorkflowPayload(){
 	try{
